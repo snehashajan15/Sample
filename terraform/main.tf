@@ -5,9 +5,10 @@ provider "aws" {
 
 # Create SSH key
 resource "aws_key_pair" "deploy_key" {
-  key_name   = "automation-key"
-  public_key = file("~/.ssh/id_rsa.pub")
+  key_name   = "my-deploy-key"
+  public_key = file("keys/terraform_key.pub")
 }
+
 
 # Security group for SSH and HTTP
 resource "aws_security_group" "web_sg" {
