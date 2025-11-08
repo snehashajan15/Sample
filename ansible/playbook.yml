@@ -63,10 +63,15 @@
 
    
     - name: Run Docker container
-      community.docker.docker_container:
-        name: sample-web
-        image: sample-web
+      docker_container:
+        name: webapp
+        image: webapp
         state: started
-        restart_policy: always
-        published_ports:
+        recreate: yes
+        build: /home/ubuntu/web
+        ports:
           - "80:80"
+
+
+
+  
