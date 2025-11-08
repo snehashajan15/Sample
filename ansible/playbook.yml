@@ -59,6 +59,7 @@
         name: sample-web
         path: /home/ubuntu/web
         state: present
+        remote_src: yes   # <-- This tells Ansible the path is on the remote host
 
     - name: Run Docker container
       docker_container:
