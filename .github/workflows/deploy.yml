@@ -24,13 +24,13 @@ jobs:
     - name: Deploy web folder to EC2
       run: |
         # Remove old web files
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@13.60.48.237 \
-          "rm -rf /home/ec2-user/dashboard-web/*"
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.60.48.237 \
+          "rm -rf /home/ubuntu/dashboard-web/*"
 
         # Copy only the web folder
-        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./web/* ec2-user@13.60.48.237:/home/ec2-user/dashboard-web/
+        scp -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -r ./web/* ubuntu@13.60.48.237:/home/ubuntu/dashboard-web/
 
         # Stop existing Docker container, remove it, and run Nginx serving web folder
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ec2-user@13.60.48.237 \
+        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ubuntu@13.60.48.237 \
           "sudo docker stop dashboard-web || true && sudo docker rm dashboard-web || true && \
-           sudo docker run -d -p 80:80 -v /home/ec2-user/dashboard-web:/usr/share/nginx/html --name dashboard-web nginx"
+           sudo docker run -d -p 80:80 -v /home/ubuntu/dashboard-web:/usr/share/nginx/html --name dashboard-web nginx"
