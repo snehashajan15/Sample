@@ -54,18 +54,39 @@
         group: ubuntu
         mode: '0755'
 
-    - name: Build Docker image from web folder
-      docker_image:
-        name: sample-web
-        path: /home/ubuntu/web
-        state: present
-        remote_src: yes   # <-- This tells Ansible the path is on the remote host
+    - name: Check Dockerfile exists on remote
+      stat:
+        path: /home/ubuntu/web/Dockerfile
+      register: dockerfile_cap
+
+    - name: Fail early if Dockerfile missing on remote
+      fail:
+        msg: "No Dockerfile found on remote at /home/ubuntu/web. Ensure ../web contains a Dockerfile (capital D)."
+      when: not dockerfile_cap.stat.exists
+
+    - name: Build Docker image on remote with docker CLI
+      shell: docker build -t sample-web:latest /home/ubuntu/web
+      args:
+        chdir: /home/ubuntu/web
+      register: docker_build
+      changed_when: docker_build.rc == 0
+      failed_when: docker_build.rc != 0
+
+    - name: Show docker build output (debug)
+      debug:
+        var: docker_build.stdout_lines
+
+    - name: Stop and remove old container if present
+      docker_container:
+        name: webapp
+        state: absent
+      ignore_errors: yes
 
     - name: Run Docker container
       docker_container:
         name: webapp
-        image: sample-web
+        image: sample-web:latest
         state: started
-        ports:
+        published_ports:
           - "80:80"
         restart_policy: unless-stopped
