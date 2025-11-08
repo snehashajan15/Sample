@@ -56,22 +56,19 @@
 
     - name: Build Docker image from web folder
       docker_image:
-        name: webapp
-        build:
-          path: /home/ubuntu/web
-        source: build
+        name: sample-web
+        path: /home/ubuntu/web
+        state:present
 
    
     - name: Run Docker container
       docker_container:
         name: webapp
-        image: webapp
+        image: sample-web
         state: started
-        recreate: yes
-        build: /home/ubuntu/web
         ports:
           - "80:80"
+        restart_policy: unless-stopped
+        
 
-
-
-  
+ 
