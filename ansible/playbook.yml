@@ -1,20 +1,38 @@
 - hosts: web
   become: true
   tasks:
-    - name: Update apt
+    - name: Update apt cache
       apt:
         update_cache: yes
 
-    - name: Install Docker
+    - name: Install Docker prerequisites
       apt:
-        name: ['docker.io']
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
         state: present
 
-    - name: Start Docker
-      service:
-        name: docker
-        state: started
-        enabled: yes
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repo
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
 
     - name: Add ubuntu user to docker group
       user:
@@ -22,15 +40,31 @@
         groups: docker
         append: yes
 
-    - name: Pull Docker image
-      docker_image:
-        name: snehas2002/sample
-        source: pull
+    - name: Ensure Docker is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
 
-    - name: Run container
-      docker_container:
-        name: simple-webpage
-        image: snehas2002/sample
+    - name: Copy web folder to EC2
+      copy:
+        src: ../web/
+        dest: /home/ubuntu/web/
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    - name: Build Docker image from web folder
+      community.docker.docker_image:
+        name: sample-web
+        build:
+          path: /home/ubuntu/web
+        state: present
+
+    - name: Run Docker container
+      community.docker.docker_container:
+        name: sample-web
+        image: sample-web
         state: started
         restart_policy: always
         published_ports:
