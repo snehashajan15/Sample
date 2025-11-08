@@ -55,12 +55,13 @@
         mode: '0755'
 
     - name: Build Docker image from web folder
-      community.docker.docker_image:
-        name: sample-web
+      docker_image:
+        name: webapp
         build:
           path: /home/ubuntu/web
-        state: present
+        source: build
 
+   
     - name: Run Docker container
       community.docker.docker_container:
         name: sample-web
